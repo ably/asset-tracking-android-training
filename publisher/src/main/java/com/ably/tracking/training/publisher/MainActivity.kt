@@ -107,13 +107,23 @@ class MainActivity : PublisherServiceActivity() {
         showRemoveTrackableButtonLoading()
         scope.launch {
             var isOperationSuccessful = false
-            publisherService?.publisher?.let {
-                // TODO
+            publisherService?.publisher?.let { publisher ->
+                trackable?.let {
+                    try {
+                        publisher.remove(it)
+                        isOperationSuccessful = true
+                    } catch (exception: ConnectionException) {
+                        showToast("Failed to remove the trackable")
+                        Log.d(TAG, exception.message, exception)
+                    }
+                }
             }
             hideRemoveTrackableButtonLoading()
             if (isOperationSuccessful) {
                 clearTrackableInfo()
                 switchToTrackableRemovedState()
+                trackable = null
+                trackableStateFlow = null
             }
         }
     }
