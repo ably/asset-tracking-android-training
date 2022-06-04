@@ -5,6 +5,35 @@ plugins {
     id 'org.jetbrains.kotlin.android' version '1.6.20' apply false
 }
 
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        maven {
+            name = "Mapbox"
+            url 'https://api.mapbox.com/downloads/v2/releases/maven'
+            authentication {
+                basic(BasicAuthentication)
+            }
+            credentials {
+                username = 'mapbox'
+                password = property('MAPBOX_DOWNLOADS_TOKEN')
+            }
+        }
+        maven {
+            name = "Mapbox Snapshots"
+            url 'https://api.mapbox.com/downloads/v2/snapshots/maven'
+            authentication {
+                basic(BasicAuthentication)
+            }
+            credentials {
+                username = 'mapbox'
+                password = property('MAPBOX_DOWNLOADS_TOKEN')
+            }
+        }
+    }
+}
+
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
