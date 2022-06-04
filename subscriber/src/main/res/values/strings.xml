@@ -4,4 +4,5 @@
     <string name="start_subscribing">Start</string>
     <string name="stop_subscribing">Stop</string>
     <string name="trackable_id_hint">Input trackable ID</string>
+    <string name="error_no_trackable_id">Insert trackable ID</string>
 </resources>

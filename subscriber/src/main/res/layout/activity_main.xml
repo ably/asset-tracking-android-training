@@ -53,8 +53,8 @@
         android:imeOptions="actionDone"
         android:inputType="text"
         app:layout_constraintBottom_toTopOf="@id/trackableStatusTextView"
-        app:layout_constraintEnd_toEndOf="@id/startButton"
-        app:layout_constraintStart_toStartOf="@id/startButton" />
+        app:layout_constraintEnd_toEndOf="@id/startSubscriberButton"
+        app:layout_constraintStart_toStartOf="@id/startSubscriberButton" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/trackableStatusTextView"
@@ -63,16 +63,17 @@
         android:layout_marginTop="@dimen/margin_small"
         android:layout_marginBottom="@dimen/margin_small"
         android:textColor="@color/black"
-        app:layout_constraintBottom_toTopOf="@id/startButton"
-        app:layout_constraintStart_toStartOf="@id/startButton"
+        app:layout_constraintBottom_toTopOf="@id/startSubscriberButton"
+        app:layout_constraintStart_toStartOf="@id/startSubscriberButton"
         tools:text="Trackable status: OFFLINE" />
 
     <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/startButton"
+        android:id="@+id/startSubscriberButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
         android:background="@drawable/button_background_selector"
+        android:enabled="false"
         android:text="@string/start_subscribing"
         android:textColor="@color/white"
         app:layout_constraintBottom_toBottomOf="parent" />
@@ -85,10 +86,10 @@
         android:indeterminateTint="@color/black"
         android:padding="@dimen/button_progress_bar_padding"
         android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@id/startButton"
-        app:layout_constraintEnd_toEndOf="@id/startButton"
-        app:layout_constraintStart_toStartOf="@id/startButton"
-        app:layout_constraintTop_toTopOf="@id/startButton"
+        app:layout_constraintBottom_toBottomOf="@id/startSubscriberButton"
+        app:layout_constraintEnd_toEndOf="@id/startSubscriberButton"
+        app:layout_constraintStart_toStartOf="@id/startSubscriberButton"
+        app:layout_constraintTop_toTopOf="@id/startSubscriberButton"
         tools:visibility="visible" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

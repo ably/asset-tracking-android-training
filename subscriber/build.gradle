@@ -16,6 +16,8 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
+        // Required to use Ably SDK.
+        buildConfigField 'String', 'ABLY_API_KEY', "\"${property('ABLY_API_KEY')}\""
         // Required to use Google Maps SDK.
         resValue 'string', 'google_maps_api_key', "${property('GOOGLE_MAPS_API_KEY')}"
     }
@@ -36,6 +38,10 @@ android {
 }
 
 dependencies {
+    // The Ably Asset Tracking Subscriber SDK for Android.
+    implementation 'com.ably.tracking:subscribing-sdk:1.1.0-rc.3'
+    // The Ably Asset Tracking UI extensions for Android.
+    implementation 'com.ably.tracking:ui-sdk:1.1.0-rc.3'
 
     // Kotlin coroutines.
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.2'
