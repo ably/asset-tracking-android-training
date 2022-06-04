@@ -71,6 +71,9 @@ class MainActivity : PublisherServiceActivity() {
             publisherService?.startPublisher()
             hideStartPublisherButtonLoading()
             switchToPublisherStartedState()
+            publisherService?.publisher?.locations
+                ?.onEach { updateTrackableLocationInfo(it.location.latitude, it.location.longitude) }
+                ?.launchIn(scope)
         } catch (connectionException: ConnectionException) {
             showToast("Failed to start the publisher")
         }
