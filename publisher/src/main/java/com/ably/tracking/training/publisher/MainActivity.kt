@@ -2,9 +2,11 @@ package com.ably.tracking.training.publisher
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import com.ably.tracking.ConnectionException
 import com.ably.tracking.TrackableState
+import com.ably.tracking.publisher.Trackable
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
 import kotlin.random.Random
@@ -14,6 +16,7 @@ class MainActivity : PublisherServiceActivity() {
 
     // SupervisorJob() is used to keep the scope working after any of its children fail
     private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+    private var trackable: Trackable? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -74,8 +77,16 @@ class MainActivity : PublisherServiceActivity() {
         scope.launch {
             var isOperationSuccessful = false
             val trackableId = generateRandomTrackableId()
-            publisherService?.publisher?.let {
-                // TODO
+            publisherService?.publisher?.let { publisher ->
+                try {
+                    trackable = Trackable(trackableId).also {
+                        trackableStateFlow = publisher.add(it)
+                    }
+                    isOperationSuccessful = true
+                } catch (exception: ConnectionException) {
+                    showToast("Failed to add a trackable")
+                    Log.d(TAG, exception.message, exception)
+                }
             }
             hideAddTrackableButtonLoading()
             if (isOperationSuccessful) {
@@ -198,12 +209,16 @@ class MainActivity : PublisherServiceActivity() {
         stopPublisherButton.isEnabled = false
         stopPublisherButton.hideText()
         stopPublisherProgressBar.show()
+        addTrackableButton.isEnabled = false
+        removeTrackableButton.isEnabled = false
     }
 
     private fun hideStopPublisherButtonLoading() {
         stopPublisherButton.isEnabled = true
         stopPublisherButton.showText()
         stopPublisherProgressBar.hide()
+        addTrackableButton.isEnabled = trackable == null
+        removeTrackableButton.isEnabled = trackable != null
     }
 
     private fun updateTrackableIdInfo(trackableId: String) {
