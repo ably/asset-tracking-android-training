@@ -6,12 +6,15 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
+import android.util.Log
 import androidx.annotation.RequiresPermission
 import androidx.core.app.NotificationCompat
 import com.ably.tracking.Accuracy
 import com.ably.tracking.Resolution
 import com.ably.tracking.connection.Authentication
 import com.ably.tracking.connection.ConnectionConfiguration
+import com.ably.tracking.logging.LogHandler
+import com.ably.tracking.logging.LogLevel
 import com.ably.tracking.publisher.DefaultResolutionPolicyFactory
 import com.ably.tracking.publisher.MapConfiguration
 import com.ably.tracking.publisher.Publisher
@@ -88,6 +91,17 @@ class PublisherService : Service() {
                     },
                     NOTIFICATION_ID
                 )
+                .logHandler(object : LogHandler {
+                    override fun logMessage(level: LogLevel, message: String, throwable: Throwable?) {
+                        when (level) {
+                            LogLevel.VERBOSE -> Log.v(TAG, message, throwable)
+                            LogLevel.INFO -> Log.i(TAG, message, throwable)
+                            LogLevel.DEBUG -> Log.d(TAG, message, throwable)
+                            LogLevel.WARN -> Log.w(TAG, message, throwable)
+                            LogLevel.ERROR -> Log.e(TAG, message, throwable)
+                        }
+                    }
+                })
                 .start()
         }
     }
