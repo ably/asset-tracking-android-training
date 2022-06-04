@@ -6,10 +6,7 @@ import android.widget.Toast
 import com.ably.tracking.ConnectionException
 import com.ably.tracking.TrackableState
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import kotlin.random.Random
 
 class MainActivity : PublisherServiceActivity() {
@@ -106,11 +103,19 @@ class MainActivity : PublisherServiceActivity() {
     private fun stopPublisherClicked() {
         showStopPublisherButtonLoading()
         scope.launch {
-            publisherService?.stopPublisher()
-            stopPublisherService()
-            hideStopPublisherButtonLoading()
-            clearTrackableInfo()
-            switchToPublisherStoppedState()
+            try {
+                publisherService?.stopPublisher()
+                stopPublisherService()
+                hideStopPublisherButtonLoading()
+                clearTrackableInfo()
+                switchToPublisherStoppedState()
+            } catch (exception: ConnectionException) {
+                showToast("Failed to stop the publisher")
+                hideStopPublisherButtonLoading()
+            } catch (timeoutException: TimeoutCancellationException) {
+                showToast("Timeout when stopping the publisher")
+                hideStopPublisherButtonLoading()
+            }
         }
     }
 

@@ -8,7 +8,14 @@ import android.content.Intent
 import android.os.IBinder
 import androidx.annotation.RequiresPermission
 import androidx.core.app.NotificationCompat
+import com.ably.tracking.Accuracy
+import com.ably.tracking.Resolution
+import com.ably.tracking.connection.Authentication
+import com.ably.tracking.connection.ConnectionConfiguration
+import com.ably.tracking.publisher.DefaultResolutionPolicyFactory
+import com.ably.tracking.publisher.MapConfiguration
 import com.ably.tracking.publisher.Publisher
+import com.ably.tracking.publisher.PublisherNotificationProvider
 import kotlinx.coroutines.*
 
 // The public token for the Mapbox SDK. For more details see the README.
@@ -58,7 +65,7 @@ class PublisherService : Service() {
         // We want to be sure that after the service is stopped the publisher is stopped too.
         // Otherwise we could end up with multiple active publishers.
         scope.launch {
-            // TODO
+            publisher?.stop()
         }
         super.onDestroy()
     }
@@ -70,13 +77,24 @@ class PublisherService : Service() {
     @RequiresPermission(anyOf = [Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION])
     fun startPublisher() {
         if (!isPublisherStarted) {
-            // TODO - START HERE
+            publisher = Publisher.publishers()
+                .connection(ConnectionConfiguration(Authentication.basic(CLIENT_ID, ABLY_API_KEY)))
+                .map(MapConfiguration(MAPBOX_ACCESS_TOKEN))
+                .resolutionPolicy(DefaultResolutionPolicyFactory(Resolution(Accuracy.MAXIMUM, 1000L, 1.0), this))
+                .androidContext(this)
+                .backgroundTrackingNotificationProvider(
+                    object : PublisherNotificationProvider {
+                        override fun getNotification(): Notification = notification
+                    },
+                    NOTIFICATION_ID
+                )
+                .start()
         }
     }
 
     suspend fun stopPublisher() {
         if (isPublisherStarted) {
-            // TODO
+            publisher?.stop()
         }
     }
 }
