@@ -7,6 +7,9 @@ import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.addTextChangedListener
+import com.ably.tracking.ConnectionException
+import com.ably.tracking.connection.Authentication
+import com.ably.tracking.connection.ConnectionConfiguration
 import com.ably.tracking.subscriber.Subscriber
 import com.ably.tracking.ui.animation.Position
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -94,9 +97,17 @@ class MainActivity : AppCompatActivity() {
                 hideKeyboard(trackableIdEditText)
                 showLoading()
                 scope.launch {
-                    // TODO - START HERE
-                    hideLoading()
-                    showStartedSubscriberLayout()
+                    try {
+                        subscriber = Subscriber.subscribers()
+                            .connection(ConnectionConfiguration(Authentication.basic(CLIENT_ID, ABLY_API_KEY)))
+                            .trackingId(trackableId)
+                            .start()
+                        hideLoading()
+                        showStartedSubscriberLayout()
+                    } catch (exception: ConnectionException) {
+                        showToast("Failed to start the subscriber")
+                        hideLoading()
+                    }
                 }
             } else {
                 showToast(R.string.error_no_trackable_id)
@@ -107,14 +118,19 @@ class MainActivity : AppCompatActivity() {
     private fun stopSubscribing() {
         showLoading()
         scope.launch {
-            // TODO
-            subscriber = null
-            enhancedMarker = null
-            enhancedAccuracyCircle = null
-            rawMarker = null
-            rawAccuracyCircle = null
-            showStoppedSubscriberLayout()
-            hideLoading()
+            try {
+                subscriber?.stop()
+                subscriber = null
+                enhancedMarker = null
+                enhancedAccuracyCircle = null
+                rawMarker = null
+                rawAccuracyCircle = null
+                showStoppedSubscriberLayout()
+                hideLoading()
+            } catch (exception: ConnectionException) {
+                showToast("Failed to stop the subscriber")
+                hideLoading()
+            }
         }
     }
 
@@ -131,6 +147,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun showToast(@StringRes stringResourceId: Int) {
         Toast.makeText(this, stringResourceId, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun showToast(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 
     private fun showLoading() {
