@@ -1,6 +1,7 @@
 package com.ably.tracking.training.subscriber
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.Toast
@@ -10,6 +11,8 @@ import androidx.core.widget.addTextChangedListener
 import com.ably.tracking.ConnectionException
 import com.ably.tracking.connection.Authentication
 import com.ably.tracking.connection.ConnectionConfiguration
+import com.ably.tracking.logging.LogHandler
+import com.ably.tracking.logging.LogLevel
 import com.ably.tracking.subscriber.Subscriber
 import com.ably.tracking.ui.animation.Position
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -32,6 +35,8 @@ private const val ABLY_API_KEY = BuildConfig.ABLY_API_KEY
 private const val ZOOM_LEVEL_STREETS = 15F
 
 class MainActivity : AppCompatActivity() {
+    private val TAG = this::class.simpleName
+
     // SupervisorJob() is used to keep the scope working after any of its children fail
     private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
@@ -101,6 +106,17 @@ class MainActivity : AppCompatActivity() {
                         subscriber = Subscriber.subscribers()
                             .connection(ConnectionConfiguration(Authentication.basic(CLIENT_ID, ABLY_API_KEY)))
                             .trackingId(trackableId)
+                            .logHandler(object : LogHandler {
+                                override fun logMessage(level: LogLevel, message: String, throwable: Throwable?) {
+                                    when (level) {
+                                        LogLevel.VERBOSE -> Log.v(TAG, message, throwable)
+                                        LogLevel.INFO -> Log.i(TAG, message, throwable)
+                                        LogLevel.DEBUG -> Log.d(TAG, message, throwable)
+                                        LogLevel.WARN -> Log.w(TAG, message, throwable)
+                                        LogLevel.ERROR -> Log.e(TAG, message, throwable)
+                                    }
+                                }
+                            })
                             .start()
                         hideLoading()
                         showStartedSubscriberLayout()
