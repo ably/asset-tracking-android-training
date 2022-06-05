@@ -9,6 +9,9 @@ import com.ably.tracking.TrackableState
 import com.ably.tracking.publisher.Trackable
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlin.random.Random
 
 class MainActivity : PublisherServiceActivity() {
@@ -17,6 +20,7 @@ class MainActivity : PublisherServiceActivity() {
     // SupervisorJob() is used to keep the scope working after any of its children fail
     private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private var trackable: Trackable? = null
+    private var trackableStateFlow: StateFlow<TrackableState>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -92,6 +96,9 @@ class MainActivity : PublisherServiceActivity() {
             if (isOperationSuccessful) {
                 updateTrackableIdInfo(trackableId)
                 switchToTrackableAddedState()
+                trackableStateFlow
+                    ?.onEach { updateTrackableStateInfo(it) }
+                    ?.launchIn(scope)
             }
         }
     }
