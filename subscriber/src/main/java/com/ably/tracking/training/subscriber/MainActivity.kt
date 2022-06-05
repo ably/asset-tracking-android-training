@@ -9,6 +9,7 @@ import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.addTextChangedListener
 import com.ably.tracking.ConnectionException
+import com.ably.tracking.TrackableState
 import com.ably.tracking.connection.Authentication
 import com.ably.tracking.connection.ConnectionConfiguration
 import com.ably.tracking.logging.LogHandler
@@ -68,6 +69,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun clearTrackableStatusInfo() {
         trackableStatusTextView.text = getString(R.string.trackable_status_info, "N/A")
+    }
+
+    private fun updateTrackableStatusInfo(state: TrackableState) {
+        trackableStatusTextView.text = getString(R.string.trackable_status_info, state.javaClass.simpleName)
     }
 
     private fun prepareMap() {
@@ -133,6 +138,9 @@ class MainActivity : AppCompatActivity() {
                                             isRaw = false
                                         )
                                     }
+                                    .launchIn(scope)
+                                trackableStates
+                                    .onEach { (updateTrackableStatusInfo(it)) }
                                     .launchIn(scope)
                             }
                         hideLoading()
