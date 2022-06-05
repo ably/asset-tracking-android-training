@@ -104,6 +104,7 @@ class PublisherService : Service() {
                     }
                 })
                 // TODO - specify constant location engine resolution
+                .rawLocations(true)
                 .start()
         }
     }
