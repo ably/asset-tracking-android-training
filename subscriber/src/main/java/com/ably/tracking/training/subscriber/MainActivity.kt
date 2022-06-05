@@ -15,6 +15,8 @@ import com.ably.tracking.connection.ConnectionConfiguration
 import com.ably.tracking.logging.LogHandler
 import com.ably.tracking.logging.LogLevel
 import com.ably.tracking.subscriber.Subscriber
+import com.ably.tracking.ui.animation.CoreLocationAnimator
+import com.ably.tracking.ui.animation.LocationAnimator
 import com.ably.tracking.ui.animation.Position
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -49,6 +51,8 @@ class MainActivity : AppCompatActivity() {
     private var enhancedAccuracyCircle: Circle? = null
     private var rawMarker: Marker? = null
     private var rawAccuracyCircle: Circle? = null
+    private var locationUpdateIntervalInMilliseconds = 1000L
+    private lateinit var enhancedLocationAnimator: LocationAnimator
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,6 +69,20 @@ class MainActivity : AppCompatActivity() {
                 stopSubscribing()
             }
         }
+    }
+
+    private fun setupLocationMarkerAnimations() {
+        clearMap()
+
+        enhancedLocationAnimator = CoreLocationAnimator()
+
+        enhancedLocationAnimator.positionsFlow
+            .onEach { showMarkerOnMap(it, isRaw = false) }
+            .launchIn(scope)
+
+        enhancedLocationAnimator.cameraPositionsFlow
+            .onEach { moveCamera(it) }
+            .launchIn(scope)
     }
 
     private fun clearTrackableStatusInfo() {
@@ -126,21 +144,20 @@ class MainActivity : AppCompatActivity() {
                             })
                             .start()
                             .apply {
+                                setupLocationMarkerAnimations()
                                 locations
                                     .onEach {
-                                        showMarkerOnMap(
-                                            Position(
-                                                it.location.latitude,
-                                                it.location.longitude,
-                                                it.location.bearing,
-                                                it.location.accuracy
-                                            ),
-                                            isRaw = false
+                                        enhancedLocationAnimator.animateLocationUpdate(
+                                            it,
+                                            locationUpdateIntervalInMilliseconds
                                         )
                                     }
                                     .launchIn(scope)
                                 trackableStates
                                     .onEach { (updateTrackableStatusInfo(it)) }
+                                    .launchIn(scope)
+                                nextLocationUpdateIntervals
+                                    .onEach { locationUpdateIntervalInMilliseconds = it }
                                     .launchIn(scope)
                             }
                         hideLoading()
@@ -162,10 +179,7 @@ class MainActivity : AppCompatActivity() {
             try {
                 subscriber?.stop()
                 subscriber = null
-                enhancedMarker = null
-                enhancedAccuracyCircle = null
-                rawMarker = null
-                rawAccuracyCircle = null
+                enhancedLocationAnimator.stop()
                 showStoppedSubscriberLayout()
                 hideLoading()
             } catch (exception: ConnectionException) {
@@ -173,6 +187,14 @@ class MainActivity : AppCompatActivity() {
                 hideLoading()
             }
         }
+    }
+
+    private fun clearMap() {
+        googleMap?.clear()
+        enhancedMarker = null
+        enhancedAccuracyCircle = null
+        rawMarker = null
+        rawAccuracyCircle = null
     }
 
     private fun showStartedSubscriberLayout() {
