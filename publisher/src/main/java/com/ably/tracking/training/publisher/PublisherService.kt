@@ -83,6 +83,7 @@ class PublisherService : Service() {
             publisher = Publisher.publishers()
                 .connection(ConnectionConfiguration(Authentication.basic(CLIENT_ID, ABLY_API_KEY)))
                 .map(MapConfiguration(MAPBOX_ACCESS_TOKEN))
+                // TODO - change the default resolution
                 .resolutionPolicy(DefaultResolutionPolicyFactory(Resolution(Accuracy.MAXIMUM, 1000L, 1.0), this))
                 .androidContext(this)
                 .backgroundTrackingNotificationProvider(
@@ -102,6 +103,7 @@ class PublisherService : Service() {
                         }
                     }
                 })
+                // TODO - specify constant location engine resolution
                 .start()
         }
     }

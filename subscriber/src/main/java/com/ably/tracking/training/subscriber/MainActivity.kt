@@ -142,6 +142,7 @@ class MainActivity : AppCompatActivity() {
                                     }
                                 }
                             })
+                            // TODO - specify preferred subscriber resolution
                             .start()
                             .apply {
                                 setupLocationMarkerAnimations()

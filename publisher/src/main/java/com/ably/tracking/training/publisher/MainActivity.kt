@@ -86,6 +86,7 @@ class MainActivity : PublisherServiceActivity() {
             val trackableId = generateRandomTrackableId()
             publisherService?.publisher?.let { publisher ->
                 try {
+                    // TODO - specify resolution constraints for the trackable
                     trackable = Trackable(trackableId).also {
                         trackableStateFlow = publisher.add(it)
                     }
