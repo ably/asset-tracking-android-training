@@ -53,6 +53,7 @@ class MainActivity : AppCompatActivity() {
     private var rawAccuracyCircle: Circle? = null
     private var locationUpdateIntervalInMilliseconds = 1000L
     private lateinit var enhancedLocationAnimator: LocationAnimator
+    private lateinit var rawLocationAnimator: LocationAnimator
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -75,6 +76,7 @@ class MainActivity : AppCompatActivity() {
         clearMap()
 
         enhancedLocationAnimator = CoreLocationAnimator()
+        rawLocationAnimator = CoreLocationAnimator()
 
         enhancedLocationAnimator.positionsFlow
             .onEach { showMarkerOnMap(it, isRaw = false) }
@@ -82,6 +84,10 @@ class MainActivity : AppCompatActivity() {
 
         enhancedLocationAnimator.cameraPositionsFlow
             .onEach { moveCamera(it) }
+            .launchIn(scope)
+
+        rawLocationAnimator.positionsFlow
+            .onEach { showMarkerOnMap(it, isRaw = true) }
             .launchIn(scope)
     }
 
@@ -154,6 +160,9 @@ class MainActivity : AppCompatActivity() {
                                         )
                                     }
                                     .launchIn(scope)
+                                rawLocations
+                                    .onEach { rawLocationAnimator.animateLocationUpdate(it, locationUpdateIntervalInMilliseconds) }
+                                    .launchIn(scope)
                                 trackableStates
                                     .onEach { (updateTrackableStatusInfo(it)) }
                                     .launchIn(scope)
@@ -181,6 +190,7 @@ class MainActivity : AppCompatActivity() {
                 subscriber?.stop()
                 subscriber = null
                 enhancedLocationAnimator.stop()
+                rawLocationAnimator.stop()
                 showStoppedSubscriberLayout()
                 hideLoading()
             } catch (exception: ConnectionException) {
